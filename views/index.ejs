@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Find a random cocktail recipe by category.">
+  <title>Cocktail Recipe Finder</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <%# app.js sends these values to EJS so the server can build this page. %>
+  <main class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <h1 id="page-title">Cocktail Recipe Finder</h1>
+      <h2 class="intro-copy">Find your next favorite cocktail. Pick a kind of cocktail, or leave it to chance.</h2>
+    </section>
+
+    <section class="finder-panel" aria-label="Find a Cocktail!">
+      <h2>What sounds good?</h2>
+
+      <form action="/cocktail" method="POST" class="finder-form">
+        <label for="location">Your Location</label>
+        <input type="text" id="location" name="location" value="<%= homeLocation %>" placeholder="Flagstaff, AZ">
+
+        <label for="category">Browse by Category</label>
+        <div class="form-row">
+          <select id="category" name="category">
+            <option value="">Surprise me with anything!</option>
+            <% categories.forEach(function (cocktailCategory) { %>
+              <option value="<%= cocktailCategory.strCategory %>" <% if (selectedCategory === cocktailCategory.strCategory) { %>selected<% } %>>
+                <%= cocktailCategory.strCategory %>
+              </option>
+            <% }); %>
+          </select>
+          <button type="submit">Find a Cocktail!</button>
+        </div>
+      </form>
+    </section>
+
+    <% if (errorMessage) { %>
+      <div class="error-message" role="alert"><%= errorMessage %></div>
+    <% } %>
+
+    <% if (uvErrorMessage) { %>
+      <div class="error-message" role="alert"><%= uvErrorMessage %></div>
+    <% } %>
+
+
+
+    <%# Show the UV result only when the location lookup succeeds. %>
+    <% if (uvReport) { %>
+      <section class="uv-card" aria-label="Today's UV index">
+        <h2>Today's UV in <%= uvReport.location %></h2>
+        <p>Current UV index: <%= uvReport.currentUv %></p>
+        <p>Today's highest UV index: <%= uvReport.maximumUv %></p>
+        <% if (uvReport.sunscreenNeeded) { %>
+          <p class="uv-answer">Yes. Apply sunscreen and use sun protection if you will be outside today.</p>
+        <% } else { %>
+          <p class="uv-answer">The UV index is below 3. Sun protection is generally recommended at UV 3 or higher.</p>
+        <% } %>
+      </section>
+    <% } %>
+
+    <% if (cocktail) { %>
+      <section class="recipe-card" aria-labelledby="recipe-name">
+        <div class="recipe-image-wrap">
+          <img class="recipe-image" src="<%= cocktail.strDrinkThumb %>" alt="<%= cocktail.strDrink %> cocktail">
+        </div>
+        <div class="recipe-content">
+          <p class="recipe-category"><%= cocktail.strCategory || 'COCKTAIL' %></p>
+          <h2 id="recipe-name"><%= cocktail.strDrink %></h2>
+          <p class="recipe-description"><%= cocktail.strAlcoholic || 'A cocktail' %><% if (cocktail.strGlass) { %> · Best served in a <%= cocktail.strGlass.toLowerCase() %><% } %></p>
+
+          <div class="recipe-details">
+            <div class="ingredients">
+              <h3>What goes in</h3>
+              <ul>
+                <%# CocktailDB numbers each ingredient and measure field from 1 to 15. %>
+                <% for (let ingredientNumber = 1; ingredientNumber <= 15; ingredientNumber += 1) { %>
+                  <% const ingredientName = cocktail['strIngredient' + ingredientNumber]; %>
+                  <% const ingredientMeasure = cocktail['strMeasure' + ingredientNumber]; %>
+                  <% if (ingredientName) { %>
+                    <li><span><%= ingredientName %></span><span class="measure"><%= ingredientMeasure || '' %></span></li>
+                  <% } %>
+                <% } %>
+              </ul>
+            </div>
+            <div class="instructions">
+              <h3>Make it</h3>
+              <p><%= cocktail.strInstructions || 'Mix the ingredients together and enjoy.' %></p>
+            </div>
+          </div>
+        </div>
+      </section>
+    <% } else if (!errorMessage) { %>
+      <section class="empty-state">
+        <p>Choose a category and we’ll find your next cocktail.</p>
+      </section>
+    <% } %>
+  </main>
+</body>
+</html>

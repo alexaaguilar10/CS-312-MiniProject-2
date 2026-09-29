@@ -1,0 +1,14 @@
+{
+  "name": "cocktail-finder",
+  "version": "1.0.0",
+  "description": "cocktail recipe finder website",
+  "main": "app.js",
+  "scripts": {
+    "start": "node --env-file=.env app.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2"
+  }
+}
